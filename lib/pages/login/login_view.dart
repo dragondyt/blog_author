@@ -1,6 +1,6 @@
+import 'package:blog_author/data/options.dart';
 import 'package:blog_author/layout/fade_images.dart';
 import 'package:blog_author/layout/text_scale.dart';
-import 'package:blog_author/pages/home/home_view.dart';
 import 'package:blog_author/routes.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -27,11 +27,13 @@ class _LoginPageState extends State<LoginPage> {
         _UsernameInput(
           maxWidth: desktopMaxWidth,
           usernameController: logic.usernameController,
+          onChanged: logic.onUsernameChanged,
         ),
         const SizedBox(height: 12),
         _PasswordInput(
           maxWidth: desktopMaxWidth,
           passwordController: logic.passwordController,
+          onChanged: logic.onPasswordChanged,
         ),
         _LoginButton(
           maxWidth: desktopMaxWidth,
@@ -45,10 +47,12 @@ class _LoginPageState extends State<LoginPage> {
         const _SmallLogo(),
         _UsernameInput(
           usernameController: logic.usernameController,
+          onChanged: logic.onUsernameChanged,
         ),
         const SizedBox(height: 12),
         _PasswordInput(
           passwordController: logic.passwordController,
+          onChanged: logic.onPasswordChanged,
         ),
         _ThumbButton(
           onTap: () {
@@ -57,24 +61,29 @@ class _LoginPageState extends State<LoginPage> {
         ),
       ];
     }
-    return Scaffold(
-      appBar: AppBar(
-        automaticallyImplyLeading: true,
-      ),
-      body: SafeArea(
-        child: Column(
-          children: [
-            if(GetPlatform.isDesktop)
-              const _TopBar(),
-            Expanded(child: Align(
-            alignment: GetPlatform.isDesktop ? Alignment.center : Alignment.topCenter,
-              child: ListView(
-                restorationId: 'login_list_view',
-                shrinkWrap: true,
-                padding: const EdgeInsets.symmetric(horizontal: 24),
-                children: listViewChildren,
-              ),
-          ))],
+    return ApplyTextOptions(
+      child: Scaffold(
+        appBar: AppBar(
+          automaticallyImplyLeading: true,
+        ),
+        body: SafeArea(
+          child: Column(
+            children: [
+              if (GetPlatform.isDesktop) const _TopBar(),
+              Expanded(
+                  child: Align(
+                alignment: GetPlatform.isDesktop
+                    ? Alignment.center
+                    : Alignment.topCenter,
+                child: ListView(
+                  restorationId: 'login_list_view',
+                  shrinkWrap: true,
+                  padding: const EdgeInsets.symmetric(horizontal: 24),
+                  children: listViewChildren,
+                ),
+              ))
+            ],
+          ),
         ),
       ),
     );
@@ -86,6 +95,7 @@ class _LoginPageState extends State<LoginPage> {
     super.dispose();
   }
 }
+
 class _TopBar extends StatelessWidget {
   const _TopBar({
     Key? key,
@@ -108,8 +118,7 @@ class _TopBar extends StatelessWidget {
                 child: SizedBox(
                   height: 80,
                   child: FadeInImagePlaceholder(
-                    image:
-                    const AssetImage('logo.png', package: 'rally_assets'),
+                    image: const AssetImage('assets/images/03433047405.jpg'),
                     placeholder: LayoutBuilder(builder: (context, constraints) {
                       return SizedBox(
                         width: constraints.maxHeight,
@@ -123,9 +132,9 @@ class _TopBar extends StatelessWidget {
               Text(
                 'loginLoginToRally'.tr,
                 style: Theme.of(context).textTheme.bodyText1!.copyWith(
-                  fontSize: 35 / reducedTextScale(context),
-                  fontWeight: FontWeight.w600,
-                ),
+                      fontSize: 35 / reducedTextScale(context),
+                      fontWeight: FontWeight.w600,
+                    ),
               ),
             ],
           ),
@@ -161,7 +170,7 @@ class _SmallLogo extends StatelessWidget {
         height: 160,
         child: ExcludeSemantics(
           child: FadeInImagePlaceholder(
-            image: AssetImage('logo.png', package: 'rally_assets'),
+            image: AssetImage('images/03433047405.jpg'),
             placeholder: SizedBox.shrink(),
           ),
         ),
@@ -173,22 +182,26 @@ class _SmallLogo extends StatelessWidget {
 class _UsernameInput extends StatelessWidget {
   const _UsernameInput({
     Key? key,
-    double? maxWidth,
+    this.maxWidth,
+    this.onChanged,
     required this.usernameController,
   }) : super(key: key);
   final TextEditingController usernameController;
+  final double? maxWidth;
+  final ValueChanged<String>? onChanged;
   @override
   Widget build(BuildContext context) {
     return Align(
       alignment: Alignment.center,
       child: Container(
-        constraints: BoxConstraints(maxWidth: double.infinity),
+        constraints: BoxConstraints(maxWidth: maxWidth ?? double.infinity),
         child: TextField(
           textInputAction: TextInputAction.next,
           controller: usernameController,
           decoration: InputDecoration(
             labelText: 'loginUsername'.tr,
           ),
+          onChanged: onChanged,
         ),
       ),
     );
@@ -198,23 +211,27 @@ class _UsernameInput extends StatelessWidget {
 class _PasswordInput extends StatelessWidget {
   const _PasswordInput({
     Key? key,
-    double? maxWidth,
+    this.maxWidth,
+    this.onChanged,
     required this.passwordController,
   }) : super(key: key);
 
   final TextEditingController passwordController;
+  final double? maxWidth;
+  final ValueChanged<String>? onChanged;
 
   @override
   Widget build(BuildContext context) {
     return Align(
       alignment: Alignment.center,
       child: Container(
-        constraints: BoxConstraints(maxWidth: double.infinity),
+        constraints: BoxConstraints(maxWidth: maxWidth ?? double.infinity),
         child: TextField(
           controller: passwordController,
           decoration: InputDecoration(
             labelText: 'loginPassword'.tr,
           ),
+          onChanged: onChanged,
           obscureText: true,
         ),
       ),
@@ -234,7 +251,7 @@ class _ThumbButton extends StatefulWidget {
 }
 
 class _ThumbButtonState extends State<_ThumbButton> {
-  late BoxDecoration borderDecoration;
+  BoxDecoration? borderDecoration;
 
   @override
   Widget build(BuildContext context) {
@@ -266,8 +283,7 @@ class _ThumbButtonState extends State<_ThumbButton> {
                 );
               });
             } else {
-              setState(() {
-              });
+              setState(() {});
             }
           },
           child: Container(
@@ -275,8 +291,7 @@ class _ThumbButtonState extends State<_ThumbButton> {
             height: 120,
             child: ExcludeSemantics(
               child: Image.asset(
-                'thumb.png',
-                package: 'rally_assets',
+                'assets/images/03433047405.jpg',
               ),
             ),
           ),
@@ -293,7 +308,7 @@ class _LoginButton extends StatelessWidget {
     required this.maxWidth,
   }) : super(key: key);
 
-  final double maxWidth;
+  final double? maxWidth;
   final VoidCallback onTap;
 
   @override
@@ -301,18 +316,17 @@ class _LoginButton extends StatelessWidget {
     return Align(
       alignment: Alignment.center,
       child: Container(
-        constraints: BoxConstraints(maxWidth: maxWidth),
+        constraints: BoxConstraints(maxWidth: maxWidth ?? double.infinity),
         padding: const EdgeInsets.symmetric(vertical: 30),
         child: Row(
           children: [
-            const Icon(Icons.check_circle_outline,
-                color: Color(0xFF09AF79)),
+            const Icon(Icons.check_circle_outline, color: Color(0xFF09AF79)),
             const SizedBox(width: 12),
             Text('rememberMe'.tr),
             const Expanded(child: SizedBox.shrink()),
             _FilledButton(
               text: 'loginButtonLogin'.tr,
-              onTap:onTap,
+              onTap: onTap,
             ),
           ],
         ),
@@ -374,4 +388,3 @@ class _FilledButton extends StatelessWidget {
     );
   }
 }
-
